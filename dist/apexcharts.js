@@ -1,5 +1,5 @@
 /*!
- * ApexCharts v3.33.0
+ * ApexCharts v3.33.2
  * (c) 2018-2022 ApexCharts
  * Released under the MIT License.
  */
@@ -2009,7 +2009,8 @@
         var elRect = this.annoCtx.graphics.drawRect(x1 - w.globals.barPadForNumericAxis, y1, coords.width + pleft + pright, coords.height + ptop + pbottom, anno.label.borderRadius, anno.label.style.background, 1, anno.label.borderWidth, anno.label.borderColor, 0);
 
         if (anno.id) {
-          elRect.node.classList.add(Utils$1.escapeString(anno.id));
+          // don't escapeString for this ID as it causes duplicate rects
+          elRect.node.classList.add(anno.id);
         }
 
         return elRect;
@@ -16482,7 +16483,7 @@
         var seriesYValArr = []; //add extra values to show markers for the first points. Included both axes to avoid incorrect positioning of the marker
 
         w.globals.seriesXvalues.forEach(function (value) {
-          seriesXValArr.push([value[0] - 0.000001].concat(value));
+          seriesXValArr.push([value[0] + 0.000001].concat(value));
         });
         w.globals.seriesYvalues.forEach(function (value) {
           seriesYValArr.push([value[0] + 0.000001].concat(value));
@@ -24779,6 +24780,22 @@
 
                 w.globals.initialConfig = Utils$1.extend({}, w.config);
                 w.globals.initialSeries = Utils$1.clone(w.config.series);
+
+                if (options.series) {
+                  // Replace the collapsed series data
+                  for (var i = 0; i < w.globals.collapsedSeriesIndices.length; i++) {
+                    var series = w.config.series[w.globals.collapsedSeriesIndices[i]];
+                    w.globals.collapsedSeries[i].data = w.globals.axisCharts ? series.data.slice() : series;
+                  }
+
+                  for (var _i = 0; _i < w.globals.ancillaryCollapsedSeriesIndices.length; _i++) {
+                    var _series = w.config.series[w.globals.ancillaryCollapsedSeriesIndices[_i]];
+                    w.globals.ancillaryCollapsedSeries[_i].data = w.globals.axisCharts ? _series.data.slice() : _series;
+                  } // Ensure that auto-generated axes are scaled to the visible data
+
+
+                  ch.series.emptyCollapsedSeries(w.config.series);
+                }
               }
             }
 
